@@ -3,7 +3,7 @@ import Combine
 
 /// A protocol that defines the core requirements for a TinyTCA feature
 /// All associated types must be Sendable for Swift 6 concurrency compliance
-protocol Feature: Sendable {
+public protocol Feature: Sendable {
     associatedtype State: Sendable
     associatedtype Action: Sendable
 
@@ -17,7 +17,7 @@ protocol Feature: Sendable {
     static func effect(for action: Action, state: State) async throws -> Action?
 }
 
-extension Feature {
+public extension Feature {
     // Default implementation: no effect
     static func effect(for action: Action, state: State) async throws -> Action? { nil }
 }
@@ -25,15 +25,15 @@ extension Feature {
 /// A store that manages state and handles actions for a specific feature
 /// Marked as @MainActor to ensure all state mutations happen on the main actor
 @MainActor
-final class Store<F: Feature>: ObservableObject {
-    @Published private(set) var state: F.State
+public final class Store<F: Feature>: ObservableObject {
+    @Published public private(set) var state: F.State
 
-    init() {
+    public init() {
         self.state = F.initialState
     }
 
     /// Send an action to the store (sync, triggers effect if present)
-    func send(_ action: F.Action) {
+    public func send(_ action: F.Action) {
         try? F.reducer(state: &state, action: action)
         Task {
             if let followUp = try? await F.effect(for: action, state: state) {
@@ -43,7 +43,7 @@ final class Store<F: Feature>: ObservableObject {
     }
 
     /// A two-way binding to the store's state for SwiftUI
-    var binding: Binding<F.State> {
+    public var binding: Binding<F.State> {
         Binding(
             get: { self.state },
             set: { self.state = $0 }
@@ -51,7 +51,7 @@ final class Store<F: Feature>: ObservableObject {
     }
 
     /// Helper for SwiftUI previews
-    static func preview(_ state: F.State) -> Store<F> {
+    public static func preview(_ state: F.State) -> Store<F> {
         let store = Store<F>()
         store.state = state
         return store
@@ -61,7 +61,7 @@ final class Store<F: Feature>: ObservableObject {
 /// A property wrapper that provides access to the store's state
 /// Must be used from MainActor context due to Store being @MainActor
 @propertyWrapper @MainActor
-struct StoreState<F: Feature>: DynamicProperty {
+public struct StoreState<F: Feature>: DynamicProperty {
     @ObservedObject private var store: Store<F>
 
     public init(_ store: Store<F>) {
