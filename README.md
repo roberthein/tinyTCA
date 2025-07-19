@@ -1,0 +1,2 @@
+# tinyTCA
+Just enough architecture.
