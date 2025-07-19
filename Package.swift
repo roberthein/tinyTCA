@@ -20,8 +20,7 @@ let package = Package(
             name: "tinyTCA",
             swiftSettings: [
                 // Strict concurrency checking (recommended for Swift 6)
-                .enableExperimentalFeature("StrictConcurrency"),
-                .unsafeFlags(["-enable-actor-data-race-checks"], .when(configuration: .debug))
+                .enableExperimentalFeature("StrictConcurrency")
             ]
         )
     ]
