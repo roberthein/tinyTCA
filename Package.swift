@@ -18,7 +18,6 @@ let package = Package(
     targets: [
         .target(
             name: "tinyTCA",
-            exclude: ["SVG"],
             swiftSettings: [
                 // Strict concurrency checking (recommended for Swift 6)
                 .enableExperimentalFeature("StrictConcurrency")

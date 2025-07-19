@@ -8,18 +8,18 @@ public protocol Feature: Sendable {
     associatedtype Action: Sendable
 
     /// The initial state of the feature
-    static var initialState: State { get }
+    var initialState: State { get }
 
     /// The reducer function that handles state mutations (sync)
-    static func reducer(state: inout State, action: Action) throws
+    func reducer(state: inout State, action: Action) throws
 
     /// Optional async effect for side effects. Return an Action? to be dispatched after the effect completes.
-    static func effect(for action: Action, state: State) async throws -> Action?
+    func effect(for action: Action, state: State) async throws -> Action?
 }
 
 public extension Feature {
     // Default implementation: no effect
-    static func effect(for action: Action, state: State) async throws -> Action? { nil }
+    func effect(for action: Action, state: State) async throws -> Action? { nil }
 }
 
 /// A store that manages state and handles actions for a specific feature
@@ -27,16 +27,18 @@ public extension Feature {
 @MainActor
 public final class Store<F: Feature>: ObservableObject {
     @Published public private(set) var state: F.State
+    private let feature: F
 
-    public init() {
-        self.state = F.initialState
+    public init(feature: F) {
+        self.feature = feature
+        self.state = feature.initialState
     }
 
     /// Send an action to the store (sync, triggers effect if present)
     public func send(_ action: F.Action) {
-        try? F.reducer(state: &state, action: action)
+        try? feature.reducer(state: &state, action: action)
         Task {
-            if let followUp = try? await F.effect(for: action, state: state) {
+            if let followUp = try? await feature.effect(for: action, state: state) {
                 self.send(followUp)
             }
         }
@@ -51,8 +53,8 @@ public final class Store<F: Feature>: ObservableObject {
     }
 
     /// Helper for SwiftUI previews
-    public static func preview(_ state: F.State) -> Store<F> {
-        let store = Store<F>()
+    public static func preview(_ feature: F, state: F.State) -> Store<F> {
+        let store = Store<F>(feature: feature)
         store.state = state
         return store
     }
