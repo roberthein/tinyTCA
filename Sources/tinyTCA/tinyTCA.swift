@@ -34,15 +34,22 @@ public final class Store<F: Feature>: ObservableObject {
         self.state = feature.initialState
     }
 
-    /// Send an action to the store (sync, triggers effect if present)
-    public func send(_ action: F.Action) {
+    /// Send an action to the store (sync, triggers effect if present), catch errors optionally
+    public func send(_ action: F.Action, catch catchAction: ((Error) -> F.Action)? = nil) {
         try? feature.reducer(state: &state, action: action)
         Task {
-            if let followUp = try? await feature.effect(for: action, state: state) {
-                self.send(followUp)
+            do {
+                if let followUp = try await feature.effect(for: action, state: state) {
+                    self.send(followUp)
+                }
+            } catch {
+                if let catchAction {
+                    self.send(catchAction(error))
+                }
             }
         }
     }
+
 
     /// A two-way binding to the store's state for SwiftUI
     public var binding: Binding<F.State> {
