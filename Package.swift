@@ -14,6 +14,10 @@ let package = Package(
             name: "tinyTCA",
             targets: ["tinyTCA"]
         ),
+        .library(
+            name: "tinyTCATestUtils",
+            targets: ["tinyTCATestUtils"]
+        )
     ],
     targets: [
         .target(
@@ -22,6 +26,14 @@ let package = Package(
                 // Strict concurrency checking (recommended for Swift 6)
                 .enableExperimentalFeature("StrictConcurrency")
             ]
+        ),
+        .target(
+            name: "tinyTCATestUtils",
+            dependencies: ["tinyTCA"]
+        ),
+        .testTarget(
+            name: "tinyTCATests",
+            dependencies: ["tinyTCA", "tinyTCATestUtils"]
         )
     ]
 )
