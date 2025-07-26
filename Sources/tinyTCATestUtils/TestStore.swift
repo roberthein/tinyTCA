@@ -2,7 +2,7 @@ import Foundation
 import Combine
 @testable import tinyTCA
 
-/// A test store for testing state changes and effects in isolation.
+/// A test store for testing state changes in isolation.
 public final class TestStore<F: Feature> {
   public init(state: F.State, feature: F) {
     self.state = state
