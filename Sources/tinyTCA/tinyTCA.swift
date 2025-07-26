@@ -50,7 +50,6 @@ public final class Store<F: Feature>: ObservableObject {
         }
     }
 
-
     /// A two-way binding to the store's state for SwiftUI
     public var binding: Binding<F.State> {
         Binding(
